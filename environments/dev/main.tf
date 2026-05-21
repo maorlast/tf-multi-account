@@ -9,10 +9,10 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "my-terraform-state-dev"
+    bucket         = "tf-multi-account-state-dev-405903923186"
     key            = "dev/terraform.tfstate"
     region         = "us-east-1"
-    dynamodb_table = "terraform-lock"
+    use_lockfile   = true
     encrypt        = true
   }
 }
