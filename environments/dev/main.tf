@@ -33,6 +33,14 @@ locals {
   }
 }
 
+module "s3_website" {
+  source = "../../modules/s3-website"
+
+  bucket_name = "${var.project_name}-dev-website"
+  website_dir = "${path.root}/../../website"
+  tags        = local.common_tags
+}
+
 module "vpc" {
   source = "../../modules/vpc"
 

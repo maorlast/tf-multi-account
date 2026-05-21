@@ -1,3 +1,8 @@
+output "website_url" {
+  description = "Static website URL"
+  value       = module.s3_website.website_url
+}
+
 output "vpc_id" {
   description = "VPC ID"
   value       = module.vpc.vpc_id
