@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tf-multi-account</title>
+  <title>Pod Info</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -15,41 +15,71 @@
       align-items: center;
       justify-content: center;
     }
-    .container { text-align: center; padding: 2rem; }
-    .badge {
-      display: inline-block;
+    .container { text-align: center; padding: 2rem; max-width: 600px; width: 100%; }
+    h1 { font-size: 2rem; font-weight: 700; margin-bottom: 2rem; }
+    h1 span { color: #6366f1; }
+    .buttons { display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem; }
+    button {
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button:hover { opacity: 0.85; }
+    #btn-org { background: #6366f1; color: white; }
+    #btn-tel { background: #10b981; color: white; }
+    .result {
       background: #1e293b;
       border: 1px solid #334155;
-      border-radius: 9999px;
-      padding: 0.25rem 1rem;
-      font-size: 0.75rem;
-      color: #94a3b8;
-      margin-bottom: 1.5rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    h1 { font-size: 3rem; font-weight: 700; margin-bottom: 1rem; }
-    h1 span { color: #6366f1; }
-    p { color: #94a3b8; font-size: 1.125rem; max-width: 480px; margin: 0 auto 2rem; }
-    .env {
-      display: inline-block;
-      background: #16a34a22;
-      border: 1px solid #16a34a;
-      color: #4ade80;
-      border-radius: 0.375rem;
-      padding: 0.375rem 0.875rem;
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
+    .label { color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .value { font-size: 1.4rem; font-weight: 700; }
+    .org { color: #6366f1; }
+    .tel { color: #10b981; }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="badge">Terraform · AWS S3</div>
-    <h1>Hello from <span>tf-multi-account</span></h1>
-    <p>This static site was provisioned and deployed automatically using Terraform.</p>
-    <span class="env">Environment: dev</span>
-    <p style="margin-top: 2rem; font-size: 0.875rem; color: #475569;">Created by Maor Last</p>
+    <h1>Pod <span>Info</span></h1>
+    <div class="buttons">
+      <button id="btn-org" onclick="callService('org')">Organization</button>
+      <button id="btn-tel" onclick="callService('telemetry')">Telemetry</button>
+    </div>
+    <div class="result" id="result">
+      <span style="color:#475569">Click a button to query a pod</span>
+    </div>
   </div>
+
+  <script>
+    const ALB = "http://k8s-podinfo-podinfo-9d6b09e164-1705600783.us-east-1.elb.amazonaws.com";
+
+    async function callService(svc) {
+      const el = document.getElementById("result");
+      el.innerHTML = '<span style="color:#475569">Loading...</span>';
+      try {
+        const res = await fetch(`${ALB}/${svc}`);
+        const data = await res.json();
+        const cls = svc === "telemetry" ? "tel" : "org";
+        el.innerHTML = `
+          <div>
+            <div class="label">Service</div>
+            <div class="value ${cls}">${data.service}</div>
+            <div class="label" style="margin-top:1rem">Pod IP</div>
+            <div class="value ${cls}">${data.pod_ip}</div>
+          </div>`;
+      } catch (e) {
+        el.innerHTML = '<span style="color:#ef4444">Error reaching service</span>';
+      }
+    }
+  </script>
 </body>
 </html>

@@ -3,9 +3,14 @@ output "website_url" {
   value       = module.s3_website.website_url
 }
 
-output "ecr_repository_url" {
-  description = "ECR repository URL"
-  value       = module.ecr.repository_url
+output "ecr_org_repository_url" {
+  description = "ECR repository URL for org-service"
+  value       = module.ecr_org.repository_url
+}
+
+output "ecr_telemetry_repository_url" {
+  description = "ECR repository URL for telemetry-service"
+  value       = module.ecr_telemetry.repository_url
 }
 
 output "eks_cluster_name" {
