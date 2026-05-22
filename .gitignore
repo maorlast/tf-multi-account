@@ -23,5 +23,8 @@ override.tf.json
 .terraformrc
 terraform.rc
 
+# Kubernetes secrets — never commit actual secret values
+k8s/*-secret.yaml
+
 # Ignore lock files (optional — commit this if you want reproducible provider versions)
 # .terraform.lock.hcl
