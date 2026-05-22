@@ -1,4 +1,4 @@
-# Terraform Playground
+# Multi-Account AWS Infrastructure
 
 AWS infrastructure boilerplate with multi-environment support using Terraform modules.
 
