@@ -1,3 +1,4 @@
+import os
 import socket
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,4 +18,8 @@ def health():
 
 @app.get("/{full_path:path}")
 def root(full_path: str):
-    return JSONResponse({"service": "telemetry", "pod_ip": socket.gethostbyname(socket.gethostname())})
+    return JSONResponse({
+        "service": "telemetry",
+        "pod_ip": socket.gethostbyname(socket.gethostname()),
+        "node_ip": os.getenv("NODE_IP", "unknown"),
+    })

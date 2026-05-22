@@ -75,6 +75,8 @@
             <div class="value ${cls}">${data.service}</div>
             <div class="label" style="margin-top:1rem">Pod IP</div>
             <div class="value ${cls}">${data.pod_ip}</div>
+            <div class="label" style="margin-top:1rem">Node IP</div>
+            <div class="value ${cls}">${data.node_ip}</div>
           </div>`;
       } catch (e) {
         el.innerHTML = '<span style="color:#ef4444">Error reaching service</span>';
