@@ -23,8 +23,8 @@ Each environment is independently managed with its own remote state backend. Sha
 | Resource | URL |
 |---|---|
 | Website | http://tf-multi-account-dev-website.s3-website-us-east-1.amazonaws.com |
-| API (org) | http://k8s-podinfo-podinfo-9d6b09e164-1705600783.us-east-1.elb.amazonaws.com/org |
-| API (telemetry) | http://k8s-podinfo-podinfo-9d6b09e164-1705600783.us-east-1.elb.amazonaws.com/telemetry |
+| API (org) | http://k8s-shared-5ce28d6746-1099577217.us-east-1.elb.amazonaws.com/org |
+| API (telemetry) | http://k8s-shared-5ce28d6746-1099577217.us-east-1.elb.amazonaws.com/telemetry |
 
 ---
 
