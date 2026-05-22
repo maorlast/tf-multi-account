@@ -30,247 +30,208 @@ data:
       "refresh": "30s",
       "time": { "from": "now-1h", "to": "now" },
       "panels": [
-        {
-          "type": "timeseries",
-          "title": "Request Rate by Service (req/s)",
-          "id": 1,
-          "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "targets": [
-            {
-              "expr": "sum(rate(http_requests_total{namespace=\"pod-info\"}[2m])) by (app)",
-              "legendFormat": "{{app}}",
-              "refId": "A"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "reqps",
-              "custom": { "lineWidth": 2, "fillOpacity": 10 }
-            }
-          },
-          "options": {
-            "tooltip": { "mode": "multi" },
-            "legend": { "displayMode": "list", "placement": "bottom" }
-          }
-        },
-        {
-          "type": "timeseries",
-          "title": "Request Rate by Status Code",
-          "id": 2,
-          "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "targets": [
-            {
-              "expr": "sum(rate(http_requests_total{namespace=\"pod-info\"}[2m])) by (status_code)",
-              "legendFormat": "HTTP {{status_code}}",
-              "refId": "A"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "reqps",
-              "custom": { "lineWidth": 2, "fillOpacity": 10 }
-            },
-            "overrides": [
-              {
-                "matcher": { "id": "byRegexp", "options": "HTTP 5.." },
-                "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
-              },
-              {
-                "matcher": { "id": "byRegexp", "options": "HTTP 4.." },
-                "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }]
-              }
-            ]
-          },
-          "options": {
-            "tooltip": { "mode": "multi" },
-            "legend": { "displayMode": "list", "placement": "bottom" }
-          }
-        },
-        {
-          "type": "timeseries",
-          "title": "Request Latency by Service",
-          "id": 3,
-          "gridPos": { "x": 0, "y": 8, "w": 24, "h": 8 },
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "targets": [
-            {
-              "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{namespace=\"pod-info\"}[2m])) by (le, app))",
-              "legendFormat": "p99 — {{app}}",
-              "refId": "A"
-            },
-            {
-              "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace=\"pod-info\"}[2m])) by (le, app))",
-              "legendFormat": "p95 — {{app}}",
-              "refId": "B"
-            },
-            {
-              "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket{namespace=\"pod-info\"}[2m])) by (le, app))",
-              "legendFormat": "p50 — {{app}}",
-              "refId": "C"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "s",
-              "custom": { "lineWidth": 2 }
-            }
-          },
-          "options": {
-            "tooltip": { "mode": "multi" },
-            "legend": { "displayMode": "list", "placement": "bottom" }
-          }
-        },
-        {
-          "type": "timeseries",
-          "title": "Request Rate by Endpoint",
-          "id": 4,
-          "gridPos": { "x": 0, "y": 16, "w": 16, "h": 8 },
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "targets": [
-            {
-              "expr": "sum(rate(http_requests_total{namespace=\"pod-info\"}[2m])) by (app, endpoint)",
-              "legendFormat": "{{app}} — {{endpoint}}",
-              "refId": "A"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "reqps",
-              "custom": { "lineWidth": 2, "fillOpacity": 5 }
-            }
-          },
-          "options": {
-            "tooltip": { "mode": "multi" },
-            "legend": { "displayMode": "list", "placement": "bottom" }
-          }
-        },
+
+        { "type": "row", "title": "Overview", "id": 100, "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 } },
+
         {
           "type": "stat",
-          "title": "Total Requests (1h)",
-          "id": 5,
-          "gridPos": { "x": 16, "y": 16, "w": 4, "h": 4 },
+          "title": "Real Traffic (1h)",
+          "description": "Actual user requests — excludes health checks and Prometheus scrapes",
+          "id": 1,
+          "gridPos": { "x": 0, "y": 1, "w": 6, "h": 4 },
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "targets": [
-            {
-              "expr": "sum(increase(http_requests_total{namespace=\"pod-info\"}[1h]))",
-              "refId": "A"
-            }
-          ],
+          "targets": [{ "expr": "sum(increase(http_requests_total{namespace=\"pod-info\", endpoint!~\"/health|/metrics\"}[1h]))", "refId": "A" }],
           "fieldConfig": {
             "defaults": {
-              "unit": "short",
-              "decimals": 0,
+              "unit": "short", "decimals": 0,
               "color": { "mode": "thresholds" },
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [{ "color": "green", "value": null }]
-              }
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] }
             }
           },
-          "options": {
-            "reduceOptions": { "calcs": ["lastNotNull"] },
-            "colorMode": "background",
-            "graphMode": "none"
-          }
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "area" }
         },
+
         {
           "type": "stat",
           "title": "Error Rate",
-          "id": 6,
-          "gridPos": { "x": 20, "y": 16, "w": 4, "h": 4 },
+          "description": "5xx responses per second",
+          "id": 2,
+          "gridPos": { "x": 6, "y": 1, "w": 6, "h": 4 },
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "targets": [
-            {
-              "expr": "sum(rate(http_requests_total{namespace=\"pod-info\", status_code=~\"5..\"}[5m])) or vector(0)",
-              "refId": "A"
-            }
-          ],
+          "targets": [{ "expr": "sum(rate(http_requests_total{namespace=\"pod-info\", status_code=~\"5..\"}[5m])) or vector(0)", "refId": "A" }],
           "fieldConfig": {
             "defaults": {
-              "unit": "reqps",
-              "decimals": 2,
+              "unit": "reqps", "decimals": 2,
               "color": { "mode": "thresholds" },
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  { "color": "green", "value": null },
-                  { "color": "red", "value": 0.01 }
-                ]
-              }
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 0.01 }] }
             }
           },
-          "options": {
-            "reduceOptions": { "calcs": ["lastNotNull"] },
-            "colorMode": "background",
-            "graphMode": "none"
-          }
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "area" }
         },
+
         {
           "type": "stat",
           "title": "p99 Latency",
-          "id": 7,
-          "gridPos": { "x": 16, "y": 20, "w": 4, "h": 4 },
+          "description": "99th percentile response time across all services",
+          "id": 3,
+          "gridPos": { "x": 12, "y": 1, "w": 6, "h": 4 },
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "targets": [
-            {
-              "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{namespace=\"pod-info\"}[5m])) by (le))",
-              "refId": "A"
-            }
-          ],
+          "targets": [{ "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{namespace=\"pod-info\"}[5m])) by (le))", "refId": "A" }],
           "fieldConfig": {
             "defaults": {
-              "unit": "s",
-              "decimals": 3,
+              "unit": "s", "decimals": 3,
               "color": { "mode": "thresholds" },
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  { "color": "green", "value": null },
-                  { "color": "yellow", "value": 0.5 },
-                  { "color": "red", "value": 1 }
-                ]
-              }
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.1 }, { "color": "red", "value": 0.5 }] }
             }
           },
-          "options": {
-            "reduceOptions": { "calcs": ["lastNotNull"] },
-            "colorMode": "background",
-            "graphMode": "none"
-          }
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "area" }
         },
+
         {
           "type": "stat",
           "title": "Running Pods",
-          "id": 8,
-          "gridPos": { "x": 20, "y": 20, "w": 4, "h": 4 },
+          "description": "Pods currently being scraped by Prometheus",
+          "id": 4,
+          "gridPos": { "x": 18, "y": 1, "w": 6, "h": 4 },
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "targets": [
-            {
-              "expr": "count(up{job=\"pod-info-pods\"} == 1)",
-              "refId": "A"
-            }
-          ],
+          "targets": [{ "expr": "count(up{job=\"pod-info-pods\"} == 1)", "refId": "A" }],
           "fieldConfig": {
             "defaults": {
               "unit": "short",
               "color": { "mode": "thresholds" },
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  { "color": "red", "value": null },
-                  { "color": "yellow", "value": 1 },
-                  { "color": "green", "value": 4 }
-                ]
-              }
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 1 }, { "color": "green", "value": 4 }] }
             }
           },
+          "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" }
+        },
+
+        { "type": "row", "title": "Real Traffic vs Background Noise", "id": 101, "gridPos": { "x": 0, "y": 5, "w": 24, "h": 1 } },
+
+        {
+          "type": "timeseries",
+          "title": "Real Traffic (req/s) — org-service vs tel-service",
+          "description": "Only counts actual user requests. Health checks and Prometheus scrapes are excluded.",
+          "id": 5,
+          "gridPos": { "x": 0, "y": 6, "w": 16, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            { "expr": "sum(rate(http_requests_total{namespace=\"pod-info\", endpoint!~\"/health|/metrics\"}[2m])) by (app)", "legendFormat": "{{app}}", "refId": "A" }
+          ],
+          "fieldConfig": {
+            "defaults": { "unit": "reqps", "custom": { "lineWidth": 2, "fillOpacity": 15 } }
+          },
+          "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list", "placement": "bottom" } }
+        },
+
+        {
+          "type": "bargauge",
+          "title": "Traffic Share",
+          "description": "Which service is handling more real traffic right now",
+          "id": 6,
+          "gridPos": { "x": 16, "y": 6, "w": 8, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            { "expr": "sum(rate(http_requests_total{namespace=\"pod-info\", endpoint!~\"/health|/metrics\"}[5m])) by (app)", "legendFormat": "{{app}}", "refId": "A" }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "color": { "mode": "palette-classic" },
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] }
+            }
+          },
+          "options": { "orientation": "horizontal", "reduceOptions": { "calcs": ["lastNotNull"] }, "displayMode": "gradient" }
+        },
+
+        {
+          "type": "timeseries",
+          "title": "Background Noise — health checks vs Prometheus scrapes",
+          "description": "This is automated traffic, not users. Health checks = ALB keeping pods alive. Metrics = Prometheus collecting data.",
+          "id": 7,
+          "gridPos": { "x": 0, "y": 14, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            { "expr": "sum(rate(http_requests_total{namespace=\"pod-info\", endpoint=\"/health\"}[2m]))", "legendFormat": "ALB health checks", "refId": "A" },
+            { "expr": "sum(rate(http_requests_total{namespace=\"pod-info\", endpoint=\"/metrics\"}[2m]))", "legendFormat": "Prometheus scrapes", "refId": "B" }
+          ],
+          "fieldConfig": {
+            "defaults": { "unit": "reqps", "custom": { "lineWidth": 2, "fillOpacity": 10 } }
+          },
+          "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list", "placement": "bottom" } }
+        },
+
+        {
+          "type": "timeseries",
+          "title": "HTTP Status Codes",
+          "description": "2xx = success, 4xx = client errors, 5xx = server errors",
+          "id": 8,
+          "gridPos": { "x": 12, "y": 14, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            { "expr": "sum(rate(http_requests_total{namespace=\"pod-info\"}[2m])) by (status_code)", "legendFormat": "HTTP {{status_code}}", "refId": "A" }
+          ],
+          "fieldConfig": {
+            "defaults": { "unit": "reqps", "custom": { "lineWidth": 2, "fillOpacity": 10 } },
+            "overrides": [
+              { "matcher": { "id": "byRegexp", "options": "HTTP 5.." }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] },
+              { "matcher": { "id": "byRegexp", "options": "HTTP 4.." }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] },
+              { "matcher": { "id": "byRegexp", "options": "HTTP 2.." }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] }
+            ]
+          },
+          "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list", "placement": "bottom" } }
+        },
+
+        { "type": "row", "title": "Latency", "id": 102, "gridPos": { "x": 0, "y": 22, "w": 24, "h": 1 } },
+
+        {
+          "type": "timeseries",
+          "title": "Response Time — p50 / p95 / p99",
+          "description": "p50 = half of requests are faster than this. p99 = only 1% of requests are slower than this.",
+          "id": 9,
+          "gridPos": { "x": 0, "y": 23, "w": 24, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            { "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{namespace=\"pod-info\"}[2m])) by (le, app))", "legendFormat": "p99 — {{app}}", "refId": "A" },
+            { "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace=\"pod-info\"}[2m])) by (le, app))", "legendFormat": "p95 — {{app}}", "refId": "B" },
+            { "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket{namespace=\"pod-info\"}[2m])) by (le, app))", "legendFormat": "p50 — {{app}}", "refId": "C" }
+          ],
+          "fieldConfig": {
+            "defaults": { "unit": "s", "custom": { "lineWidth": 2 } }
+          },
+          "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list", "placement": "bottom" } }
+        },
+
+        { "type": "row", "title": "Per Pod Breakdown", "id": 103, "gridPos": { "x": 0, "y": 31, "w": 24, "h": 1 } },
+
+        {
+          "type": "table",
+          "title": "Request Totals per Pod",
+          "description": "Current cumulative totals for each pod since startup",
+          "id": 10,
+          "gridPos": { "x": 0, "y": 32, "w": 24, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "expr": "sort_desc(sum(http_requests_total{namespace=\"pod-info\"}) by (pod, endpoint, app))",
+              "instant": true,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": { "unit": "short" },
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "Value" }, "properties": [{ "id": "displayName", "value": "Total Requests" }] }
+            ]
+          },
           "options": {
-            "reduceOptions": { "calcs": ["lastNotNull"] },
-            "colorMode": "background",
-            "graphMode": "none"
-          }
+            "sortBy": [{ "displayName": "Total Requests", "desc": true }],
+            "footer": { "show": false }
+          },
+          "transformations": [
+            { "id": "labelsToFields", "options": { "valueLabel": "pod" } },
+            { "id": "organize", "options": { "excludeByName": { "Time": true, "job": true, "instance": true, "namespace": true, "pod_template_hash": true } } }
+          ]
         }
       ]
     }
