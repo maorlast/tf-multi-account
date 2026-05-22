@@ -18,6 +18,16 @@ Each environment is independently managed with its own remote state backend. Sha
 
 ---
 
+## Dev Environment URLs
+
+| Resource | URL |
+|---|---|
+| Website | http://tf-multi-account-dev-website.s3-website-us-east-1.amazonaws.com |
+| API (org) | http://k8s-podinfo-podinfo-9d6b09e164-1705600783.us-east-1.elb.amazonaws.com/org |
+| API (telemetry) | http://k8s-podinfo-podinfo-9d6b09e164-1705600783.us-east-1.elb.amazonaws.com/telemetry |
+
+---
+
 ## Prerequisites
 
 | Requirement | Version | Install |
