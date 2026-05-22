@@ -4,18 +4,25 @@ metadata:
   name: pod-info
   namespace: pod-info
   annotations:
-    kubernetes.io/ingress.class: alb                        # use AWS ALB instead of nginx
-    alb.ingress.kubernetes.io/scheme: internet-facing       # public ALB (vs internal)
-    alb.ingress.kubernetes.io/target-type: ip               # route directly to pod IPs (not node)
-    alb.ingress.kubernetes.io/healthcheck-path: /health     # ALB health check endpoint
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-path: /health
 spec:
   rules:
     - http:
         paths:
-          - path: /
+          - path: /org
             pathType: Prefix
             backend:
               service:
-                name: pod-info
+                name: org-service
+                port:
+                  number: 80
+          - path: /telemetry
+            pathType: Prefix
+            backend:
+              service:
+                name: tel-service
                 port:
                   number: 80

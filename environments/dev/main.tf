@@ -25,7 +25,6 @@ provider "aws" {
   }
 }
 
-# kubernetes provider removed — k8s resources are now managed via kubectl (k8s/)
 
 locals {
   common_tags = {
@@ -54,10 +53,17 @@ module "s3_website" {
   tags        = local.common_tags
 }
 
-module "ecr" {
+module "ecr_org" {
   source = "../../modules/ecr"
 
-  name = "${var.project_name}-dev-pod-info"
+  name = "${var.project_name}-dev-org-pod-info"
+  tags = local.common_tags
+}
+
+module "ecr_telemetry" {
+  source = "../../modules/ecr"
+
+  name = "${var.project_name}-dev-telemetry-pod-info"
   tags = local.common_tags
 }
 
@@ -70,5 +76,3 @@ module "eks" {
   instance_type      = "t3.medium"
   tags               = local.common_tags
 }
-
-# k8s_app module removed — app is now deployed via: kubectl apply -f k8s/
