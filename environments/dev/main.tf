@@ -6,14 +6,6 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.0"
-    }
-    tls = {
-      source  = "hashicorp/tls"
-      version = "~> 4.0"
-    }
   }
 
   backend "s3" {
@@ -33,16 +25,7 @@ provider "aws" {
   }
 }
 
-provider "kubernetes" {
-  host                   = module.eks.cluster_endpoint
-  cluster_ca_certificate = base64decode(module.eks.cluster_ca_certificate)
-
-  exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    command     = "aws"
-    args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
-  }
-}
+# kubernetes provider removed — k8s resources are now managed via kubectl (k8s/)
 
 locals {
   common_tags = {
@@ -88,11 +71,4 @@ module "eks" {
   tags               = local.common_tags
 }
 
-module "k8s_app" {
-  source = "../../modules/k8s-app"
-
-  image    = "${module.ecr.repository_url}:latest"
-  replicas = length(var.availability_zones) * 2
-
-  depends_on = [module.eks]
-}
+# k8s_app module removed — app is now deployed via: kubectl apply -f k8s/
