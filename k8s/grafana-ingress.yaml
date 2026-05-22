@@ -1,29 +1,22 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: pod-info
-  namespace: pod-info
+  name: grafana
+  namespace: monitoring
   annotations:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/healthcheck-path: /grafana/api/health
     alb.ingress.kubernetes.io/group.name: shared
 spec:
   rules:
     - http:
         paths:
-          - path: /org
+          - path: /grafana
             pathType: Prefix
             backend:
               service:
-                name: org-service
+                name: grafana
                 port:
-                  number: 80
-          - path: /telemetry
-            pathType: Prefix
-            backend:
-              service:
-                name: tel-service
-                port:
-                  number: 80
+                  number: 3000
