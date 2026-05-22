@@ -3,6 +3,16 @@ output "website_url" {
   value       = module.s3_website.website_url
 }
 
+output "ecr_repository_url" {
+  description = "ECR repository URL"
+  value       = module.ecr.repository_url
+}
+
+output "eks_cluster_name" {
+  description = "EKS cluster name"
+  value       = module.eks.cluster_name
+}
+
 output "vpc_id" {
   description = "VPC ID"
   value       = module.vpc.vpc_id
