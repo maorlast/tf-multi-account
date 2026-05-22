@@ -15,10 +15,17 @@
       align-items: center;
       justify-content: center;
     }
-    .container { text-align: center; padding: 2rem; max-width: 600px; width: 100%; }
+    .container { text-align: center; padding: 2rem; max-width: 640px; width: 100%; }
     h1 { font-size: 2rem; font-weight: 700; margin-bottom: 2rem; }
     h1 span { color: #6366f1; }
-    .buttons { display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem; }
+    .section-label {
+      color: #475569;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+    .buttons { display: flex; gap: 1rem; justify-content: center; margin-bottom: 1.5rem; }
     button {
       padding: 0.75rem 2rem;
       font-size: 1rem;
@@ -29,6 +36,7 @@
       transition: opacity 0.2s;
     }
     button:hover { opacity: 0.85; }
+    button:active { transform: scale(0.97); }
     #btn-org { background: #6366f1; color: white; }
     #btn-tel { background: #10b981; color: white; }
     .result {
@@ -40,22 +48,64 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      margin-bottom: 2.5rem;
     }
     .label { color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 0.5rem; }
     .value { font-size: 1.4rem; font-weight: 700; }
     .org { color: #6366f1; }
     .tel { color: #10b981; }
+    .divider { border: none; border-top: 1px solid #1e293b; margin: 0.5rem 0 2rem; }
+
+    /* Click Counter */
+    .click-grid { display: flex; gap: 1.5rem; justify-content: center; }
+    .click-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 0.75rem;
+      padding: 1.5rem 2rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .click-count {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .click-sublabel { color: #475569; font-size: 0.75rem; }
+    #btn-click-org { background: #6366f1; color: white; padding: 0.6rem 1.5rem; font-size: 0.95rem; }
+    #btn-click-tel { background: #10b981; color: white; padding: 0.6rem 1.5rem; font-size: 0.95rem; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Pod <span>Info</span></h1>
+
+    <div class="section-label">Pod Query</div>
     <div class="buttons">
       <button id="btn-org" onclick="callService('org')">Organization</button>
       <button id="btn-tel" onclick="callService('telemetry')">Telemetry</button>
     </div>
     <div class="result" id="result">
       <span style="color:#475569">Click a button to query a pod</span>
+    </div>
+
+    <hr class="divider" />
+
+    <div class="section-label">Click Counter — persisted in PostgreSQL</div>
+    <div class="click-grid">
+      <div class="click-card">
+        <div class="click-count org" id="count-org">-</div>
+        <div class="click-sublabel">org-service clicks</div>
+        <button id="btn-click-org" onclick="recordClick('org')">Click!</button>
+      </div>
+      <div class="click-card">
+        <div class="click-count tel" id="count-tel">-</div>
+        <div class="click-sublabel">telemetry clicks</div>
+        <button id="btn-click-tel" onclick="recordClick('telemetry')">Click!</button>
+      </div>
     </div>
   </div>
 
@@ -82,6 +132,30 @@
         el.innerHTML = '<span style="color:#ef4444">Error reaching service</span>';
       }
     }
+
+    async function recordClick(svc) {
+      const id = svc === "org" ? "count-org" : "count-tel";
+      const el = document.getElementById(id);
+      try {
+        const res = await fetch(`${ALB}/${svc}/click`, { method: "POST" });
+        const data = await res.json();
+        el.textContent = data.clicks;
+      } catch (e) {
+        el.textContent = "err";
+      }
+    }
+
+    async function loadCounts() {
+      for (const [svc, id] of [["org", "count-org"], ["telemetry", "count-tel"]]) {
+        try {
+          const res = await fetch(`${ALB}/${svc}/clicks`);
+          const data = await res.json();
+          document.getElementById(id).textContent = data.clicks;
+        } catch (e) {}
+      }
+    }
+
+    loadCounts();
   </script>
 </body>
 </html>
