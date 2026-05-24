@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kiali
+  namespace: istio-system
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/group.name: shared
+    alb.ingress.kubernetes.io/healthcheck-path: /kiali/healthz
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /kiali
+            pathType: Prefix
+            backend:
+              service:
+                name: kiali
+                port:
+                  number: 20001
