@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cleanup-clicks
+  namespace: pod-info
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 3
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: cleanup
+          image: postgres:16-alpine
+          command:
+            - sh
+            - -c
+            - sleep 60 && psql -c "DELETE FROM clicks;"
+          env:
+            - name: PGHOST
+              value: postgres
+            - name: PGDATABASE
+              value: clickdb
+            - name: PGUSER
+              value: postgres
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: password
